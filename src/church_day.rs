@@ -5,8 +5,8 @@ use std::fmt;
 pub enum DayClass {
     Solemnity,
     Sunday,
-    Feast,
-    Memorial,
+    //Feast,
+    //Memorial,
     SeasonalWeekday,
     FerialWeekday,
     DayOfFastingAndAbstinenceFromDefinition,
@@ -17,8 +17,8 @@ impl fmt::Display for DayClass {
         match self {
             DayClass::Solemnity => write!(f, "Solemnity"),
             DayClass::Sunday => write!(f, "Sunday"),
-            DayClass::Feast => write!(f, "Feast"),
-            DayClass::Memorial => write!(f, "Memorial"),
+            //DayClass::Feast => write!(f, "Feast"),
+            //DayClass::Memorial => write!(f, "Memorial"),
             DayClass::SeasonalWeekday => write!(f, "Seasonal Weekday"),
             DayClass::FerialWeekday => write!(f, "Ferial"),
             DayClass::DayOfFastingAndAbstinenceFromDefinition => {
