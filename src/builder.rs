@@ -24,6 +24,7 @@ fn easter_for_year(year: i32) -> ChurchDay {
         day.try_into().unwrap(),
         DayClass::Solemnity,
         Season::Easter,
+        "Easter Sunday of the Resurrection of the Lord",
     )
 }
 
@@ -31,8 +32,9 @@ fn ash_wednesday(easter: &ChurchDay) -> ChurchDay {
     let date = easter.date - Duration::days(46);
     ChurchDay {
         date,
-        class: DayClass::DayOfFastingAndAbstinenceFromDefinition,
+        class: DayClass::Solemnity,
         season: Season::Lent,
+        description: String::from("Ash Wednesday"),
     }
 }
 
@@ -54,6 +56,7 @@ fn first_sunday_advent(year: i32) -> ChurchDay {
         date,
         class: DayClass::Sunday,
         season: Season::Advent,
+        description: String::from("First Sunday of Advent"),
     }
 }
 
@@ -67,6 +70,7 @@ fn epiphany(year: i32) -> Option<ChurchDay> {
                 day,
                 DayClass::Sunday,
                 Season::Christmas,
+                "The Epiphany of the Lord",
             ))
         } else {
             None
@@ -80,6 +84,7 @@ fn baptism(epiphany: ChurchDay) -> ChurchDay {
         date,
         class: DayClass::Sunday,
         season: Season::Christmas,
+        description: String::from("The Baptism of the Lord"),
     }
 }
 
@@ -89,17 +94,32 @@ fn pentecost(easter: ChurchDay) -> ChurchDay {
         date,
         class: DayClass::Solemnity,
         season: Season::Easter,
+        description: String::from("Pentecost Sunday"),
     }
 }
 
-fn triduum(easter: ChurchDay) -> Vec<ChurchDay> {
+fn holy_week(easter: ChurchDay) -> Vec<ChurchDay> {
     let mut triduum = Vec::new();
-    for &days_before in &[3, 2, 1] {
+    for &days_before in &[7, 6, 5, 4, 3, 2, 1] {
         let date = easter.date - Duration::days(days_before);
         triduum.push(ChurchDay {
             date,
             class: DayClass::Solemnity,
-            season: Season::Triduum,
+            season: if days_before < 4 {
+                Season::Triduum
+            } else {
+                Season::Lent
+            },
+            description: String::from(match days_before {
+                7 => "Palm Sunday of the Passion of the Lord",
+                6 => "Monday of Holy Week",
+                5 => "Tuesday of Holy Week",
+                4 => "Wednesday of Holy Week",
+                3 => "Thursday of Holy Week (Holy Thursday)",
+                2 => "Good Friday",
+                1 => "Holy Saturday",
+                _ => "If you got here, something went real bad",
+            }),
         });
     }
     triduum
@@ -132,94 +152,113 @@ fn add_days_until(
             date,
             class,
             season,
+            description: String::from(""),
         });
         date += Duration::days(1);
     }
 }
+
+fn add_days_including(
+    days: &mut Vec<ChurchDay>,
+    start_date: NaiveDate,
+    end_date: &ChurchDay,
+    season: Season,
+    class_fn: fn(Weekday) -> DayClass,
+) {
+    let mut date = start_date;
+    while date < end_date.date {
+        let class = class_fn(date.weekday());
+        days.push(ChurchDay {
+            date,
+            class,
+            season,
+            description: String::from(""),
+        });
+        date += Duration::days(1);
+    }
+    days.push(end_date.clone());
+}
+
 pub fn build_church_year(today: DateTime<Local>) -> ChurchYear {
     let year = today.year();
     let easter = easter_for_year(year);
     let ash_wednesday = ash_wednesday(&easter);
     let first_sunday_advent = first_sunday_advent(year);
     let epiphany = epiphany(year).expect("Unable to calculate Epiphany.");
-    let baptism = baptism(epiphany);
-    let pentecost = pentecost(easter);
-    let mut triduum = triduum(easter);
+    let baptism = baptism(epiphany.clone());
+    let pentecost = pentecost(easter.clone());
+    let mut holy_week = holy_week(easter.clone());
 
     let mut days: Vec<ChurchDay> = Vec::new();
 
-    add_days_until(
+    add_days_including(
         &mut days,
         NaiveDate::from_ymd_opt(year, 1, 1).expect("Unable to create date."),
-        epiphany.date,
+        &epiphany,
         Season::Christmas,
         day_class,
     );
 
-    days.push(epiphany);
-
-    add_days_until(
+    add_days_including(
         &mut days,
         epiphany.date + Duration::days(1),
-        baptism.date,
+        &baptism,
         Season::Christmas,
         day_class,
     );
 
-    days.push(baptism);
+    days.push(baptism.clone());
 
-    add_days_until(
+    add_days_including(
         &mut days,
         baptism.date + Duration::days(1),
-        ash_wednesday.date,
+        &ash_wednesday,
         Season::OrdinaryTime,
         ordinary_time_class,
     );
 
-    days.push(ash_wednesday);
-
-    let holy_thursday = easter.date - Duration::days(3);
     add_days_until(
         &mut days,
         ash_wednesday.date + Duration::days(1),
-        holy_thursday,
+        easter.date - Duration::days(7),
         Season::Lent,
         day_class,
     );
 
-    days.append(&mut triduum);
-    days.push(easter);
+    days.append(&mut holy_week);
+    days.push(easter.clone());
 
-    add_days_until(
+    add_days_including(
         &mut days,
         easter.date + Duration::days(1),
-        pentecost.date,
+        &pentecost,
         Season::Easter,
         day_class,
     );
 
-    days.push(pentecost);
-
-    add_days_until(
+    add_days_including(
         &mut days,
         pentecost.date + Duration::days(1),
-        first_sunday_advent.date,
+        &first_sunday_advent,
         Season::OrdinaryTime,
         ordinary_time_class,
     );
 
-    days.push(first_sunday_advent);
-
-    add_days_until(
+    let christmas = ChurchDay::new(
+        year,
+        12,
+        25,
+        DayClass::Solemnity,
+        Season::Christmas,
+        "The Nativity of the Lord (Christmas)",
+    );
+    add_days_including(
         &mut days,
         first_sunday_advent.date + Duration::days(1),
-        NaiveDate::from_ymd_opt(year, 12, 25).expect("Unable to create Christmas."),
+        &christmas,
         Season::Advent,
         day_class,
     );
-
-    let christmas = ChurchDay::new(year, 12, 25, DayClass::Solemnity, Season::Christmas);
-    days.push(christmas);
 
     add_days_until(
         &mut days,

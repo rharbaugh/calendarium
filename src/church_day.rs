@@ -5,11 +5,10 @@ use std::fmt;
 pub enum DayClass {
     Solemnity,
     Sunday,
-    //Feast,
-    //Memorial,
+    Feast,
+    Memorial,
     SeasonalWeekday,
     FerialWeekday,
-    DayOfFastingAndAbstinenceFromDefinition,
 }
 
 impl fmt::Display for DayClass {
@@ -17,13 +16,10 @@ impl fmt::Display for DayClass {
         match self {
             DayClass::Solemnity => write!(f, "Solemnity"),
             DayClass::Sunday => write!(f, "Sunday"),
-            //DayClass::Feast => write!(f, "Feast"),
-            //DayClass::Memorial => write!(f, "Memorial"),
+            DayClass::Feast => write!(f, "Feast"),
+            DayClass::Memorial => write!(f, "Memorial"),
             DayClass::SeasonalWeekday => write!(f, "Seasonal Weekday"),
             DayClass::FerialWeekday => write!(f, "Ferial"),
-            DayClass::DayOfFastingAndAbstinenceFromDefinition => {
-                write!(f, "Day of Fasting and Abstinence")
-            }
         }
     }
 }
@@ -51,20 +47,29 @@ impl fmt::Display for Season {
     }
 }
 
-#[derive(Copy, Clone)]
+#[derive(Clone)]
 pub struct ChurchDay {
     pub date: NaiveDate,
     pub class: DayClass,
     pub season: Season,
+    pub description: String,
 }
 
 impl ChurchDay {
-    pub fn new(year: i32, month: u32, day: u32, class: DayClass, season: Season) -> Self {
+    pub fn new(
+        year: i32,
+        month: u32,
+        day: u32,
+        class: DayClass,
+        season: Season,
+        description: &str,
+    ) -> Self {
         Self {
             date: NaiveDate::from_ymd_opt(year, month, day)
                 .expect("Unable to instantiate new ChurchDay"),
             class,
             season,
+            description: String::from(description),
         }
     }
 
