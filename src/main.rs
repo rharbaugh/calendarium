@@ -1,4 +1,5 @@
 use chrono::{DateTime, Datelike, Duration, Local, NaiveDate, Weekday};
+use std::convert::TryInto;
 use std::fmt;
 
 #[derive(Copy, Clone)]
@@ -51,7 +52,7 @@ impl fmt::Display for Season {
     }
 }
 
-#[derive(Clone)]
+#[derive(Copy, Clone)]
 struct ChurchDay {
     date: NaiveDate,
     class: DayClass,
@@ -83,13 +84,6 @@ impl ChurchDay {
 
 struct ChurchYear {
     days: Vec<ChurchDay>,
-}
-
-fn is_leap_year(year: i32) -> bool {
-    let by_4 = year % 4 == 0;
-    let by_100 = year % 100 == 0;
-    let by_400 = year % 400 == 0;
-    by_4 && (!by_100 || by_400)
 }
 
 fn easter_for_year(year: i32) -> ChurchDay {
