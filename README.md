@@ -1,7 +1,8 @@
 # calendarium
 Calculate the church calendar for the current year.
 
-To make it interesting, doing it in C and only using the standard library.
+To make it interesting, doing it in RUST (lol) and trying to avoid crates for the calculations.
+Rust doesn't have a nice standard library way of getting current date so we immediately put that in a struct.
 
 Eventually adding args to specify years/dates, file output, etc.
 
