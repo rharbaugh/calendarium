@@ -69,10 +69,6 @@ impl ChurchDay {
         }
     }
 
-    fn day_of_week(&self) -> Weekday {
-        self.date.weekday()
-    }
-
     fn month_name(&self) -> String {
         self.date.format("%B").to_string()
     }
