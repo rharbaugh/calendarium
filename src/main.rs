@@ -5,6 +5,19 @@ enum DayClass {
     Solemnity,
     Sunday,
     Feast,
+    Memorial,
+    SeasonalWeekday,
+    FerialWeekday,
+}
+
+#[derive(Copy, Clone)]
+enum Season {
+    Advent,
+    Christmas,
+    OrdinaryTime,
+    Lent,
+    Triduum,
+    Easter,
 }
 
 #[derive(Copy)]
@@ -13,6 +26,7 @@ struct ChurchDay {
     month: i32,
     date: i32,
     class: DayClass,
+    season: Season,
 }
 
 impl Clone for ChurchDay {
@@ -22,6 +36,7 @@ impl Clone for ChurchDay {
             month: self.month.clone(),
             date: self.date.clone(),
             class: self.class.clone(),
+            season: self.season.clone(),
         }
     }
 }
@@ -167,6 +182,7 @@ fn easter_for_year(year: i32) -> ChurchDay {
         month,
         date,
         class: DayClass::Solemnity,
+        season: Season::Easter,
     }
 }
 
@@ -243,8 +259,7 @@ fn subtract_days(start_day: &ChurchDay, amount: i32) -> ChurchDay {
 }
 
 fn ash_wednesday(easter: &ChurchDay) -> ChurchDay {
-    let mut ash_wednesday = subtract_days(easter, 46);
-    ash_wednesday.class = DayClass::Feast;
+    let ash_wednesday = subtract_days(easter, 46);
     ash_wednesday
 }
 
@@ -254,6 +269,7 @@ fn first_sunday_advent(year: i32) -> ChurchDay {
         month: 12,
         date: 1,
         class: DayClass::Sunday,
+        season: Season::Advent,
     };
 
     let days_to_subtract = match dec_first.day_of_week() {
@@ -275,14 +291,67 @@ fn first_sunday_advent(year: i32) -> ChurchDay {
     }
 }
 
+fn epiphany(year: i32) -> Option<ChurchDay> {
+    //first sunday between jan 2 and 6
+    for date in 2..9 {
+        let day = ChurchDay {
+            year,
+            month: 1,
+            date,
+            class: DayClass::Sunday,
+            season: Season::Christmas,
+        };
+        if day.day_of_week() == 0 {
+            return Some(day);
+        }
+    }
+    None
+}
+
+fn baptism(epiphany: ChurchDay) -> ChurchDay {
+    add_days(&epiphany, 7)
+}
+
+fn pentecost(easter: ChurchDay) -> ChurchDay {
+    add_days(&easter, 49)
+}
+
+fn triduum(easter: ChurchDay) -> Vec<ChurchDay> {
+    let mut triduum = Vec::new();
+    triduum.push(subtract_days(&easter, 3));
+    triduum.push(subtract_days(&easter, 2));
+    triduum.push(subtract_days(&easter, 1));
+    triduum
+}
+
 fn build_church_year(today: DateTime<Local>) -> ChurchYear {
+    //find epiphany
+    //baptism is always the sunday after the epiphany
+    //jan 1 to baptism is 'christmas' season
+    //day after baptism until ash wednesday is ordinary time
+    //ash wednesday until triduum is lent
+    //triduum
+    //easter season until pentecost
+    //day after pentecost until first sunday of advent is ordinary time
+    //advent until christmas
+    //christmas until jan 31
+
     let easter = easter_for_year(today.year());
     let ash_wednesday = ash_wednesday(&easter);
     let first_sunday_advent = first_sunday_advent(today.year());
+    let epiphany = epiphany(today.year()).expect("Unable to calculate Epiphany.");
+    let baptism = baptism(epiphany);
+    let pentecost = pentecost(easter);
+    let mut triduum = triduum(easter);
 
     let mut days: Vec<ChurchDay> = Vec::new();
+
+    days.push(epiphany);
+    days.push(baptism);
     days.push(ash_wednesday);
+    days.append(&mut triduum);
     days.push(easter);
+    days.push(pentecost);
     days.push(first_sunday_advent);
 
     ChurchYear { days }
