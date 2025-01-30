@@ -178,29 +178,16 @@ fn pentecost(easter: ChurchDay) -> ChurchDay {
 }
 
 fn triduum(easter: ChurchDay) -> Vec<ChurchDay> {
-    vec![
-        ChurchDay::new(
-            easter.date.year(),
-            easter.date.month(),
-            easter.date.day() - 3,
-            DayClass::Solemnity,
-            Season::Triduum,
-        ),
-        ChurchDay::new(
-            easter.date.year(),
-            easter.date.month(),
-            easter.date.day() - 2,
-            DayClass::Solemnity,
-            Season::Triduum,
-        ),
-        ChurchDay::new(
-            easter.date.year(),
-            easter.date.month(),
-            easter.date.day() - 1,
-            DayClass::Solemnity,
-            Season::Triduum,
-        ),
-    ]
+    let mut triduum = Vec::new();
+    for &days_before in &[3, 2, 1] {
+        let date = easter.date - Duration::days(days_before);
+        triduum.push(ChurchDay {
+            date,
+            class: DayClass::Solemnity,
+            season: Season::Triduum,
+        });
+    }
+    triduum
 }
 
 fn build_church_year(today: DateTime<Local>) -> ChurchYear {
