@@ -179,6 +179,8 @@ fn add_days_including(
     days.push(end_date.clone());
 }
 
+fn update_descriptions(days: &mut Vec<ChurchDay>) {}
+
 pub fn build_church_year(today: DateTime<Local>) -> ChurchYear {
     let year = today.year();
     let easter = easter_for_year(year);
@@ -267,6 +269,8 @@ pub fn build_church_year(today: DateTime<Local>) -> ChurchYear {
         Season::Christmas,
         day_class,
     );
+
+    update_descriptions(&mut days);
 
     ChurchYear { days }
 }
