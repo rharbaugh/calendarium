@@ -7,9 +7,10 @@ use builder::*;
 
 fn main() {
     let today = Local::now();
-    let year = build_church_year(today);
+    let year = proper_of_seasons(today.naive_local().into());
     for day in year.days.iter() {
         println!(
+            //"{}, {} {}, {} - {}",
             "{}, {} {}, {} - {} - {} in {}",
             day.string_day_of_week(),
             day.month_name(),
