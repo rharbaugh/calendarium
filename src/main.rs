@@ -7,8 +7,10 @@ use builder::*;
 
 fn main() {
     let today = Local::now();
-    let year = proper_of_seasons(today.naive_local().into());
-    for day in year.days.iter() {
+
+    let seasons = proper_of_seasons(today.naive_local().into());
+
+    for day in seasons.days.iter() {
         println!(
             //"{}, {} {}, {} - {}",
             "{}, {} {}, {} - {} - {} in {}",
