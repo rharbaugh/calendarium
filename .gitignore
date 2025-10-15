@@ -1,0 +1,52 @@
+# Compiled executable
+calendarium
+calendarium.exe
+
+# Object files
+*.o
+*.obj
+
+# Debug files
+*.dSYM/
+*.su
+*.idb
+*.pdb
+
+# Compiler outputs
+*.out
+*.exe
+*.app
+a.out
+
+# Editor/IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Build directories
+build/
+bin/
+obj/
+
+# Core dumps
+core
+core.*
+vgcore.*
+
+# Dependency files
+*.d
+
+# Static and shared libraries
+*.a
+*.so
+*.dylib
+*.dll
+*.lib
+
+# Temporary files
+*.tmp
+*.bak
+*.log
