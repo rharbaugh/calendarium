@@ -3,6 +3,7 @@
 #include "church_day.h"
 #include "builder.h"
 #include "args.h"
+#include "csv_loader.h"
 
 static int compare_dates(struct tm d1, struct tm d2) {
 	if (d1.tm_year != d2.tm_year) return d1.tm_year - d2.tm_year;
@@ -35,6 +36,17 @@ int main(int argc, char *argv[]) {
 
 	ChurchYear seasons = proper_of_seasons(args.target_date);
 
+	// Attempt to load feast days from CSV
+	int csv_result = load_feasts_from_csv(&seasons, args.feasts_csv_path);
+	int csv_error = 0;
+	if (csv_result == -1) {
+		csv_error = 1;  // File not found - will display error at end
+	} else if (csv_result == -2) {
+		fprintf(stderr, "Error parsing CSV file: %s\n", args.feasts_csv_path);
+		church_year_free(&seasons);
+		return 1;
+	}
+
 	switch (args.mode) {
 		case MODE_ALL:
 		case MODE_YEAR:
@@ -47,11 +59,14 @@ int main(int argc, char *argv[]) {
 		case MODE_TODAY:
 		case MODE_DATE: {
 			// Print only the specified day
+			// If multiple days match (e.g., feast day + weekday), prefer the highest ranking
 			ChurchDay *found = NULL;
 			for (size_t i = 0; i < seasons.count; i++) {
 				if (compare_dates(seasons.days[i].date, args.target_date) == 0) {
-					found = &seasons.days[i];
-					break;
+					if (found == NULL || seasons.days[i].class < found->class) {
+						// Lower enum value = higher rank (SOLEMNITY=0 is highest)
+						found = &seasons.days[i];
+					}
 				}
 			}
 
@@ -64,6 +79,11 @@ int main(int argc, char *argv[]) {
 			}
 			break;
 		}
+	}
+
+	// Display error if CSV file was not found
+	if (csv_error) {
+		fprintf(stderr, "Warning: Could not load feast days from '%s' (file not found)\n", args.feasts_csv_path);
 	}
 
 	church_year_free(&seasons);

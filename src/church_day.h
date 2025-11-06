@@ -21,10 +21,17 @@ typedef enum {
 	EASTER
 } Season;
 
+typedef enum {
+	LORD,
+	BVM,
+	NONE
+} Subject;
+
 typedef struct {
 	struct tm date;
 	DayClass class;
 	Season season;
+	Subject subject;
 	char description[256];
 } ChurchDay;
 
@@ -48,6 +55,9 @@ const char* day_class_to_string(DayClass class);
 
 //Get string representation of Season
 const char* season_to_string(Season season);
+
+//Get string representation of Subject
+const char* subject_to_string(Subject subject);
 
 //ChurchYear functions
 ChurchYear church_year_new(void);

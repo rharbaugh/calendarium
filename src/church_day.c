@@ -15,6 +15,7 @@ ChurchDay church_day_new(int year, int month, int day, DayClass class, Season se
 
 	cd.class = class;
 	cd.season = season;
+	cd.subject = NONE;
 	strncpy(cd.description, description, sizeof(cd.description) - 1);
 	cd.description[sizeof(cd.description) - 1] = '\0';
 
@@ -53,6 +54,15 @@ const char* season_to_string(Season season) {
 		case LENT: return "Lent";
 		case TRIDUUM: return "Sacred Triduum";
 		case EASTER: return "Easter";
+		default: return "Unknown";
+	}
+}
+
+const char* subject_to_string(Subject subject) {
+	switch(subject) {
+		case LORD: return "Lord";
+		case BVM: return "BVM";
+		case NONE: return "None";
 		default: return "Unknown";
 	}
 }

@@ -14,6 +14,7 @@ typedef struct {
 	OutputMode mode;
 	struct tm target_date;
 	int target_year;
+	char feasts_csv_path[512];
 } ProgramArgs;
 
 // Parse command line arguments

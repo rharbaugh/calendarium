@@ -10,6 +10,7 @@ void print_usage(const char *program_name) {
 	printf("  --all              Print all days in the current liturgical year\n");
 	printf("  --date MM-DD-YYYY  Print the liturgical day for the specified date\n");
 	printf("  --year YYYY        Print all days in the specified year\n");
+	printf("  --feasts PATH      Load feast days from CSV file (default: feasts.csv)\n");
 	printf("  --help             Display this help message\n");
 	printf("\nWith no options, prints only today's liturgical day.\n");
 }
@@ -46,7 +47,9 @@ int parse_args(int argc, char *argv[], ProgramArgs *args) {
 	struct tm *today = localtime(&now);
 	args->target_date = *today;
 	args->target_year = today->tm_year + 1900;
-	
+	strncpy(args->feasts_csv_path, "feasts.csv", sizeof(args->feasts_csv_path) - 1);
+	args->feasts_csv_path[sizeof(args->feasts_csv_path) - 1] = '\0';
+
 	for (int i = 1; i < argc; i++) {
 		if (strcmp(argv[i], "--help") == 0) {
 			print_usage(argv[0]);
@@ -92,12 +95,22 @@ int parse_args(int argc, char *argv[], ProgramArgs *args) {
 			mktime(&args->target_date);
 			
 			i++; // Skip the year argument
+		} else if (strcmp(argv[i], "--feasts") == 0) {
+			if (i + 1 >= argc) {
+				fprintf(stderr, "Error: --feasts requires a file path argument\n");
+				return -1;
+			}
+
+			strncpy(args->feasts_csv_path, argv[i + 1], sizeof(args->feasts_csv_path) - 1);
+			args->feasts_csv_path[sizeof(args->feasts_csv_path) - 1] = '\0';
+
+			i++; // Skip the file path argument
 		} else {
 			fprintf(stderr, "Unknown option: %s\n", argv[i]);
 			print_usage(argv[0]);
 			return -1;
 		}
 	}
-	
+
 	return 0;
 }
