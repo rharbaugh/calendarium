@@ -1,0 +1,7 @@
+# Sample feast days CSV
+# Format: month,day,class,season,subject,description
+1,1,SOLEMNITY,CHRISTMAS,BVM,Mary Mother of God
+3,25,SOLEMNITY,LENT,LORD,The Annunciation of the Lord
+8,15,SOLEMNITY,ORDINARY_TIME,BVM,The Assumption of the Blessed Virgin Mary
+11,1,SOLEMNITY,ORDINARY_TIME,NONE,All Saints
+12,8,SOLEMNITY,ADVENT,BVM,The Immaculate Conception
